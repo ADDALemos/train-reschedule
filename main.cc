@@ -28,15 +28,11 @@
  * SOFTWARE.
  *
  */
-#ifndef MAXSATNID
-#define MAXSATNID 1
-#endif
 
-#if MAXSATNID<5
 #include "utils/Options.h"
 #include "utils/ParseUtils.h"
 #include "utils/System.h"
-#endif
+
 
 #include <errno.h>
 #include <signal.h>
@@ -50,22 +46,18 @@
 #include <vector>
 #include <cstring>
 #include <limits.h>
-#if MAXSATNID <5
+
 #ifdef SIMP
 #include "simp/SimpSolver.h"
 #else
-
 #include "core/Solver.h"
+#endif
 
-#endif
-#endif
 #include <cinttypes>
 
 
 
 
-
-#if  MAXSATNID==1
 #include "solver/TT-Open-WBO-Inc/MaxSAT.h"
 #include "solver/TT-Open-WBO-Inc/MaxSATFormula.h"
 #include "solver/TT-Open-WBO-Inc/MaxTypes.h"
@@ -86,59 +78,6 @@
 #include "solver/TT-Open-WBO-Inc/algorithms/Alg_BLS.h"
 #include "solver/TT-Open-WBO-Inc/Test.h"
 
-#elif MAXSATNID==2
-#include "solver/Loandra/MaxSAT.h"
-#include "solver/Loandra/MaxSATFormula.h"
-#include "solver/Loandra/MaxTypes.h"
-#include "solver/Loandra/ParserMaxSAT.h"
-#include "solver/Loandra/ParserPB.h"
-
-
-// Algorithms
-#include "solver/Loandra/algorithms/Alg_LinearSU.h"
-#include "solver/Loandra/algorithms/Alg_MSU3.h"
-#include "solver/Loandra/algorithms/Alg_OLL.h"
-#include "solver/Loandra/algorithms/Alg_PartMSU3.h"
-#include "solver/Loandra/algorithms/Alg_WBO.h"
-#include "solver/Loandra/algorithms/Alg_PMRES.h"
-
-#elif MAXSATNID==4
-LNSparameters lns_params;
-bool bmoB;
-int pbB;
-int cardinalityB;
-#include "solver/LinSBPS/LNSparameters.h"
-#include "solver/LinSBPS/MaxSAT.h"
-#include "solver/LinSBPS/MaxTypes.h"
-#include "solver/LinSBPS/ParserMaxSAT.h"
-#include "solver/LinSBPS/ParserPB.h"
-
-// Algorithms
-#include "solver/LinSBPS/algorithms/Alg_LinearSU.h"
-#include "solver/LinSBPS/algorithms/Alg_MSU3.h"
-#include "solver/LinSBPS/algorithms/Alg_OLL.h"
-#include "solver/LinSBPS/algorithms/Alg_PartMSU3.h"
-#include "solver/LinSBPS/algorithms/Alg_WBO.h"
-
-#elif MAXSATNID==3
-
-#include "solver/Open-WBO-Inc/MaxSAT.h"
-#include "solver/Open-WBO-Inc/MaxTypes.h"
-#include "solver/Open-WBO-Inc/ParserMaxSAT.h"
-#include "solver/Open-WBO-Inc/ParserPB.h"
-
-// Algorithms
-#include "solver/Open-WBO-Inc/algorithms/Alg_LinearSU.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_LinearSU_IncBMO.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_LinearSU_IncCluster.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_MSU3.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_OLL.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_OLL_IncCluster.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_PartMSU3.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_WBO.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_OBV.h"
-#include "solver/Open-WBO-Inc/algorithms/Alg_BLS.h"
-#endif
 
 //RapidJSON reader
 #include "rapidjson/reader.h"
@@ -170,7 +109,7 @@ int minV=INT_MAX; int maxV=0; int diffV=0;
 Instance readJSONFile(char *);
 int size=-1;
 
-#if MAXSATNID <5
+
 using NSPACE::BoolOption;
 using NSPACE::IntOption;
 using NSPACE::IntRange;
@@ -215,31 +154,14 @@ void LinSBPS(int argc, char **argv);
 void Open_WBO_Inc(int argc, char **argv);
 void genEncoding(int argc, char **argv);
 
-#endif
+
 
 
 using namespace rapidjson;
 using namespace std;
   Instance readPESPInstance(char* local);
 
-#if MAXSATNID==5
-#include "solver/SATLike/basis_pms.h"
-#include "solver/SATLike/pms.h"
-#include <signal.h>
-static Satlike s;
-int main(int argc, char **argv) {
-    instance= readJSONFile(argv[1]);
 
-    cout<<"This is Satlike3.0 solver"<<endl;
-    vector<int> init_solution;
-    s.local_search_with_decimation(init_solution,argv[1]);
-    s.print_best_solution();
-    s.free_memory();
-}
-#endif
-
-
-#if MAXSATNID <5
 int main(int argc, char **argv) {
     //    readOutputJSONFile(argv[1]);
     double initial_time = cpuTime();
@@ -257,15 +179,9 @@ int main(int argc, char **argv) {
 #endif
 
 
-#if  MAXSATNID==1
+
     tt(argc,argv);
-#elif MAXSATNID==2
-        loandra(argc,argv);
-#elif MAXSATNID==3
-        Open_WBO_Inc(argc,argv);
-#elif  MAXSATNID==4
-        LinSBPS(argc,argv);
-#endif
+
 
 
 
@@ -311,45 +227,9 @@ int main(int argc, char **argv) {
         std::string delimiter = "^";
 
         StatusCode code;
-#if MAXSATNID==4
-        int starting_precision = -1;
-        int n_ini_vars = maxsat_formula->n_initial_vars;
-        while(1==1){
-        code = S->search();
 
-        vec<lbool> previous_model;
-        for (int i = 0; i < S->model.size(); i++) {
-            previous_model.push(S->model[i]);
-        }
-        uint64_t oldUB = S->bestUB_true;
-
-        starting_precision--;
-        if (starting_precision > 0) {
-            setFormulaToPrecision(maxsat_formula, starting_precision);
-
-            for (int i = 0; i < maxsat_formula->soft_clauses.size(); i++) {
-                maxsat_formula->soft_clauses[i].relaxation_vars.clear();
-            }
-
-            S = new LinearSU(0, bmoB, cardinalityB, pbB, lns_params);
-            S->setInitialTime(initial_time);
-            S = S;
-            S->loadFormula(maxsat_formula);
-
-            //for (int i = 0; i < previous_model.size(); i++) {
-            for(int i = 0; i < n_ini_vars; i++){
-                S->model.push(previous_model[i]);
-            }
-            S->bestUB_true = oldUB;
-
-            S->_use_only_original_vars = true;
-        }
-        }
-#else
          code = S->search();
-#endif
         std::cout<<(clock() - myTimeStart) / CLOCKS_PER_SEC<<std::endl;
-        std::exit(1);
         while(code!=_SATISFIABLE_&&code!=_OPTIMUM_){
             S->getConflict();
             for (int i = 0; i < S->errorP.size(); i++) {
@@ -595,544 +475,18 @@ void genEncoding(int argc, char **argv) {
     if(of->_lits.size()!=0)
             maxsat_formula->addObjFunction(of);
 }
-#endif
 
-#if  MAXSATNID==3
-void Open_WBO_Inc(int argc, char **argv){
 
-BoolOption printmodel("Open-WBO", "print-model", "Print model.\n", true);
 
-    IntOption verbosity("Open-WBO", "verbosity",
-                        "Verbosity level (0=minimal, 1=more).\n", 0,
-                        IntRange(0, 1));
-
-    IntOption algorithm("Open-WBO", "algorithm",
-                        "Search algorithm "
-                        "(0=wbo,1=linear-su,2=msu3,3=part-msu3,4=oll,5=best,6="
-                        "bmo,7=obv,8=mcs)\n",
-                        6, IntRange(0, 8));
-
-    IntOption partition_strategy("PartMSU3", "partition-strategy",
-                                 "Partition strategy (0=sequential, "
-                                 "1=sequential-sorted, 2=binary)"
-                                 "(only for unsat-based partition algorithms).",
-                                 2, IntRange(0, 2));
-
-    IntOption graph_type("PartMSU3", "graph-type",
-                         "Graph type (0=vig, 1=cvig, 2=res) (only for unsat-"
-                         "based partition algorithms).",
-                         2, IntRange(0, 2));
-
-    BoolOption bmo("Open-WBO", "bmo", "BMO search.\n", true);
-
-    BoolOption complete("Open-WBO-Inc-BMO","complete","Switch to complete algorithm when Inc-BMO terminates.\n",true);
-
-    IntOption cardinality("Encodings", "cardinality",
-                          "Cardinality encoding (0=cardinality networks, "
-                          "1=totalizer, 2=modulo totalizer).\n",
-                          1, IntRange(0, 2));
-
-    IntOption amo("Encodings", "amo", "AMO encoding (0=Ladder).\n", 0,
-                  IntRange(0, 0));
-
-    IntOption pb("Encodings", "pb", "PB encoding (0=SWC,1=GTE,2=GTECluster).\n",
-                 1, IntRange(0, 2));
-
-    IntOption formula("Open-WBO", "formula",
-                      "Type of formula (0=WCNF, 1=OPB).\n", 0, IntRange(0, 1));
-
-    IntOption weight(
-        "WBO", "weight-strategy",
-        "Weight strategy (0=none, 1=weight-based, 2=diversity-based).\n", 2,
-        IntRange(0, 2));
-
-    BoolOption symmetry("WBO", "symmetry", "Symmetry breaking.\n", true);
-
-    IntOption symmetry_lim(
-        "WBO", "symmetry-limit",
-        "Limit on the number of symmetry breaking clauses.\n", 500000,
-        IntRange(0, INT32_MAX));
-
-    IntOption cluster_algorithm("Clustering", "ca",
-                                "Clustering algorithm "
-                                "(0=none, 1=DivisiveMaxSeparate)",
-                                1, IntRange(0, 1));
-    IntOption num_clusters("Clustering", "c", "Number of agglomerated clusters",
-                           100000, IntRange(1, INT_MAX));
-
-    IntOption rounding_strategy(
-        "Clustering", "rs",
-        "Statistic used to select"
-        " common weights in a cluster (0=Mean, 1=Median, 2=Min)",
-        0, IntRange(0, 2));
-
-    IntOption num_conflicts(
-      "Incomplete","conflicts","Limit on the number of conflicts.\n", 10000,
-      IntRange(0, INT32_MAX));
-
-    IntOption num_iterations(
-      "Incomplete","iterations","Limit on the number of iterations.\n", 100000,
-      IntRange(0, INT32_MAX));
-
-    BoolOption local("Incomplete", "local", "Local limit on the number of conflicts.\n", false);
-
-    IntOption optionT("Timetabler", "opt-time",
-                     "0 - For all section and all time\n"
-                             "1 - For all time\n"
-                             "2 - Smart time\n",
-                     2);
-
-
-    parseOptions(argc, argv, true);
-                         option=(int) optionT;
-
-    Statistics rounding_statistic =
-        static_cast<Statistics>((int)rounding_strategy);
-
-    switch ((int)algorithm) {
-    case _ALGORITHM_WBO_:
-      S = new WBO(verbosity, weight, symmetry, symmetry_lim);
-      break;
-
-    case _ALGORITHM_LINEAR_SU_:
-      if ((int)(cluster_algorithm) == 1) {
-        S = new LinearSUIncCluster(verbosity, bmo, cardinality, pb,
-                            ClusterAlg::_DIVISIVE_, rounding_statistic,
-                            (int)(num_clusters));
-      } else {
-        S = new LinearSU(verbosity, bmo, cardinality, pb);
-      }
-      break;
-
-    case _ALGORITHM_PART_MSU3_:
-      S = new PartMSU3(verbosity, partition_strategy, graph_type, cardinality);
-      break;
-
-    case _ALGORITHM_MSU3_:
-      S = new MSU3(verbosity);
-      break;
-
-    case _ALGORITHM_LSU_INCBMO_:
-      S = new LinearSUIncBMO(verbosity, bmo, cardinality, pb,
-                                 ClusterAlg::_DIVISIVE_, rounding_statistic,
-                                 (int)(num_clusters), complete);
-      break;
-
-    case _ALGORITHM_LSU_MRSBEAVER_:
-      S = new OBV(verbosity, cardinality, num_conflicts, num_iterations, local);
-      break;
-
-    case _ALGORITHM_LSU_MCS_:
-      S = new BLS(verbosity, cardinality, num_conflicts, num_iterations, local);
-      break;
-
-    case _ALGORITHM_OLL_:
-      if ((int)(cluster_algorithm) == 1) {
-        S = new OLLIncCluster(verbosity, cardinality, ClusterAlg::_DIVISIVE_,
-                       rounding_statistic, (int)(num_clusters));
-      } else {
-        S = new OLL(verbosity, cardinality);
-      }
-      break;
-
-    case _ALGORITHM_BEST_:
-      break;
-
-    default:
-      printf("c Error: Invalid MaxSAT algorithm.\n");
-      printf("s UNKNOWN\n");
-      exit(_ERROR_);
-    }
-
-    signal(SIGXCPU, SIGINT_exit);
-    signal(SIGTERM, SIGINT_exit);
-
-
-    genEncoding(argc,argv);
-
-    if (maxsat_formula->getProblemType() == _UNWEIGHTED_) {
-        // Unweighted
-        S = new PartMSU3(_VERBOSITY_MINIMAL_, _PART_BINARY_, RES_GRAPH,
-                         cardinality);
-        S->loadFormula(maxsat_formula);
-
-        if (((PartMSU3 *)S)->chooseAlgorithm() == _ALGORITHM_MSU3_) {
-          // FIXME: possible memory leak
-          S = new MSU3(_VERBOSITY_MINIMAL_);
-        }
-
-      } else {
-        // Weighted
-        S = new OLL(_VERBOSITY_MINIMAL_, cardinality);
-      }
-      if (S->getMaxSATFormula() == NULL) {
-      S->loadFormula(maxsat_formula);
-      if ((int)(cluster_algorithm) == 1) {
-        switch ((int)algorithm) {
-        case _ALGORITHM_LINEAR_SU_:
-          static_cast<LinearSUIncCluster *>(S)->initializeCluster();
-          break;
-        case _ALGORITHM_OLL_:
-          static_cast<OLLIncCluster *>(S)->initializeCluster();
-          break;
-        case _ALGORITHM_LSU_INCBMO_:
-          static_cast<LinearSUIncBMO *>(S)->initializeCluster();
-          break;
-        }
-      }
-    }
-
-
-
-}
-#endif
-
-#if  MAXSATNID==4
-bool g_should_print_at_the_end = true;
-void LinSBPS(int argc, char **argv){
-    BoolOption printmodel("Open-WBO", "print-model", "Print model.\n", true);
-
-    IntOption verbosity("Open-WBO", "verbosity",
-                        "Verbosity level (0=minimal, 1=more).\n", 0,
-                        IntRange(0, 1));
-
-    IntOption algorithm("Open-WBO", "algorithm",
-                        "Search algorithm "
-                                "(0=wbo,1=linear-su,2=msu3,3=part-msu3,4=oll,5=best)."
-                                "\n",
-                        5, IntRange(0, 5));
-
-    IntOption partition_strategy("PartMSU3", "partition-strategy",
-                                 "Partition strategy (0=sequential, "
-                                         "1=sequential-sorted, 2=binary)"
-                                         "(only for unsat-based partition algorithms).",
-                                 2, IntRange(0, 2));
-
-    IntOption graph_type("PartMSU3", "graph-type",
-                         "Graph type (0=vig, 1=cvig, 2=res) (only for unsat-"
-                                 "based partition algorithms).",
-                         2, IntRange(0, 2));
-
-    BoolOption bmo("Open-WBO", "bmo", "BMO search.\n", true);
-
-    IntOption cardinality("Encodings", "cardinality",
-                          "Cardinality encoding (0=cardinality networks, "
-                                  "1=totalizer, 2=modulo totalizer).\n",
-                          1, IntRange(0, 2));
-
-    IntOption amo("Encodings", "amo", "AMO encoding (0=Ladder).\n", 0,
-                  IntRange(0, 0));
-
-    IntOption pb("Encodings", "pb", "PB encoding (0=SWC,1=GTE).\n", 1,
-                 IntRange(0, 0));
-
-    IntOption formula("Open-WBO", "formula",
-                      "Type of formula (0=WCNF, 1=OPB).\n", 0, IntRange(0, 1));
-
-    IntOption weight(
-            "WBO", "weight-strategy",
-            "Weight strategy (0=none, 1=weight-based, 2=diversity-based).\n", 2,
-            IntRange(0, 2));
-
-    BoolOption symmetry("WBO", "symmetry", "Symmetry breaking.\n", true);
-
-    IntOption symmetry_lim(
-            "WBO", "symmetry-limit",
-            "Limit on the number of symmetry breaking clauses.\n", 500000,
-            IntRange(0, INT32_MAX));
-    BoolOption optC1T("Timetabler", "opt-allocation",
-                     "Optimality for Allocation?\n",
-                     false);
-    IntOption optionT("Timetabler", "opt-time",
-                     "0 - For all section and all time\n"
-                             "1 - For all time\n"
-                             "2 - Smart time\n",
-                     2);
-
-
-
-
-
-    BoolOption phase_saving_solution_based("Open-WBO", "phase-saving-solution-based", "Phase saving solution based.\n", false);
-    BoolOption backjump_strat("Open-WBO", "backjump-strat", "Backjump strategy to sbps until first conflict.\n", false);
-    BoolOption backjump_alternate("Open-WBO", "backjump-alternate", "Set objective variables to one in phase saving.\n", false);
-
-    BoolOption alternate_sbps_ps("Open-WBO", "alternate-sbps-ps", "Alternate between sbps and ps.\n", false);
-    BoolOption obj_phasing_zero("Open-WBO", "obj-ps-zero", "Set objective variables to zero in phase saving.\n", false);
-    BoolOption obj_phasing_one("Open-WBO", "obj-ps-one", "Set objective variables to one in phase saving.\n", false);
-
-    IntOption should_print_end("Open-WBO", "end-print", "indicates whether the solver should print the solution at the end\n", 1, IntRange(0, 1));
-
-    IntOption neg_sbps("Open-WBO", "negsbps",
-                       "Search algorithm "
-                               "(0=wbo,1=linear-su,2=msu3,3=part-msu3,4=oll,5=best)."
-                               "\n",
-                       0, IntRange(0, 100));
-
-    IntOption sbps_chance("Open-WBO", "sbps-chance",
-                          "Search algorithm "
-                                  "(0=wbo,1=linear-su,2=msu3,3=part-msu3,4=oll,5=best)."
-                                  "\n",
-                          0, IntRange(0, 100));
-
-    IntOption eproc_thresh("Open-WBO", "eprocthreshold",
-                           "the sum of soft weights that trigger eproc.\n", 500000,
-                           IntRange(1, 50000000));
-
-    IntOption eproc_contribution_factor(
-            "Open-WBO", "eprocfactor",
-            "fraction of contribution necessary to be qualified for a starting precision in eproc.\n", 5,
-            IntRange(0, 100));
-
-    BoolOption emir_preprocessing("Open-WBO", "eproc", "Reduce precision and increase with search.\n", false);
-
-
-
-
-    parseOptions(argc, argv, true);
-    bmoB=(bool) bmo;
-    pbB =(int) pb;
-    cardinalityB=(int) cardinality;
-                         option=(int) optionT;
-
-
-    g_should_print_at_the_end = should_print_end;
-
-        double initial_time = cpuTime();
-
-
-
-
-        lns_params._eproc = emir_preprocessing;
-        lns_params._sbps = phase_saving_solution_based;
-        lns_params._backjump_shift_strat = backjump_strat;
-        lns_params._obj_phasing_zero = obj_phasing_zero;
-        lns_params._obj_phasing_one = obj_phasing_one;
-        lns_params._negative_sbps_chance = neg_sbps;
-        lns_params._alternate_sbps_ps = alternate_sbps_ps;
-        lns_params._alternate_backjumps = backjump_alternate;
-
-        lns_params._sbps_chance = sbps_chance;
-
-        if (lns_params._negative_sbps_chance > 0 && lns_params._sbps == false) {
-            printf("sbps chance non zero but sbps is off\n");
-            exit(1);
-        }
-        switch ((int)algorithm) {
-    case _ALGORITHM_WBO_:
-      S = new WBO(verbosity, weight, symmetry, symmetry_lim);
-      break;
-
-    case _ALGORITHM_LINEAR_SU_:
-      S = new LinearSU(verbosity, bmo, cardinality, pb, lns_params);
-      break;
-
-    case _ALGORITHM_PART_MSU3_:
-      S = new PartMSU3(verbosity, partition_strategy, graph_type, cardinality);
-      break;
-
-    case _ALGORITHM_MSU3_:
-      S = new MSU3(verbosity);
-      break;
-
-    case _ALGORITHM_OLL_:
-      S = new OLL(verbosity, cardinality);
-      break;
-
-    case _ALGORITHM_BEST_:
-      break;
-
-    default:
-      printf("c Error: Invalid MaxSAT algorithm.\n");
-      printf("s UNKNOWN\n");
-      exit(_ERROR_);
-    }
-    signal(SIGXCPU, SIGINT_exit);
-    signal(SIGTERM, SIGINT_exit);
-
-    genEncoding(argc,argv);
-
-
-
-    if (maxsat_formula->getProblemType() == _UNWEIGHTED_) {
-        // Unweighted
-        S = new PartMSU3(_VERBOSITY_MINIMAL_, _PART_BINARY_, RES_GRAPH,
-                         cardinality);
-        S->loadFormula(maxsat_formula);
-
-        if (((PartMSU3 *)S)->chooseAlgorithm() == _ALGORITHM_MSU3_) {
-          // FIXME: possible memory leak
-          S = new MSU3(_VERBOSITY_MINIMAL_);
-        }
-
-      } else {
-        // Weighted
-        S = new OLL(_VERBOSITY_MINIMAL_, cardinality);
-      }
-
-
-
-}
-#endif
-
-#if  MAXSATNID==2
-void loandra(int argc, char **argv){
-    StringOption printsoft("Open-WBO", "print-unsat-soft", "Print unsatisfied soft claues in the optimal assignment.\n", NULL);
-
-    IntOption verbosity("Open-WBO", "verbosity",
-                        "Verbosity level (0=minimal, 1=more).\n", 1,
-                        IntRange(0, 1));
-                        BoolOption optC1T("Timetabler", "opt-allocation",
-                     "Optimality for Allocation?\n",
-                     false);
-    IntOption optionT("Timetabler", "opt-time",
-                     "0 - For all section and all time\n"
-                             "1 - For all time\n"
-                             "2 - Smart time\n",
-                     2);
-    IntOption algorithm("Open-WBO", "algorithm",
-                        "Search algorithm "
-                                "(0=wbo,1=PMRES,2=linear-su,3=msu3,4=part-msu3,5=oll,6=best)."
-                                "\n",
-                        1, IntRange(0, 6));
-
-    IntOption partition_strategy("PartMSU3", "partition-strategy",
-                                 "Partition strategy (0=sequential, "
-                                         "1=sequential-sorted, 2=binary)"
-                                         "(only for unsat-based partition algorithms).",
-                                 2, IntRange(0, 2));
-
-    IntOption graph_type("PartMSU3", "graph-type",
-                         "Graph type (0=vig, 1=cvig, 2=res) (only for unsat-"
-                                 "based partition algorithms).",
-                         2, IntRange(0, 2));
-
-    BoolOption bmo("Open-WBO", "bmo", "BMO search.\n", true);
-
-    IntOption cardinality("Encodings", "cardinality",
-                          "Cardinality encoding (0=cardinality networks, "
-                                  "1=totalizer, 2=modulo totalizer).\n",
-                          1, IntRange(0, 2));
-
-    IntOption amo("Encodings", "amo", "AMO encoding (0=Ladder).\n", 0,
-                  IntRange(0, 0));
-
-    IntOption pb("Encodings", "pb", "PB encoding (0=SWC,1=GTE,2=Adder).\n", 1,
-                 IntRange(0, 2));
-
-    IntOption formula("Open-WBO", "formula",
-                      "Type of formula (0=WCNF, 1=OPB).\n", 0, IntRange(0, 1));
-
-    IntOption weight(
-            "WBO", "weight-strategy",
-            "Weight strategy (0=none, 1=weight-based, 2=diversity-based).\n", 2,
-            IntRange(0, 2));
-
-    BoolOption symmetry("WBO", "symmetry", "Symmetry breaking.\n", true);
-
-    IntOption symmetry_lim(
-            "WBO", "symmetry-limit",
-            "Limit on the number of symmetry breaking clauses.\n", 500000,
-            IntRange(0, INT32_MAX));
-
-
-
-
-    IntOption pmreslin("PMRES", "pmreslin", "Run linear search in conjunction with PMRES: "
-                               "(0=not att all, 1=first cores then lin 2=only lins) .\n", 1,
-                       IntRange(0, 3));
-
-    BoolOption pmreslin_delsol("PMRES", "pmreslin-del", "Delete Solver between core guided and linear search.\n", true);
-
-    BoolOption pmreslin_varres("PMRES", "pmreslin-varres", "Do varying resolution.\n", true);
-
-    BoolOption pmreslin_relax2strat("PMRES", "pmreslin-relax2strat", "RelaxCores before strat.\n", false);
-
-    BoolOption pmreslin_varresCG("PMRES", "pmreslin-varresCG", "Do varying resolution for CG.\n", false);
-
-    BoolOption pmreslin_incvarres("PMRES", "pmreslin-incvarres", "Do varying resolution incrementally.\n", false);
-
-    IntOption pmreslin_cgLim("PMRES", "pmreslin-cglim", "Time limit for core guided phase (s): "
-                                     "(-1=not att all) .\n", 30,
-                             IntRange(-1, INT_MAX));
-
-
-
-    parseOptions(argc, argv, true);
-                         option=(int) optionT;
-
-    switch ((int)algorithm) {
-        case _ALGORITHM_WBO_:
-            S = new WBO(verbosity, weight, symmetry, symmetry_lim);
-            break;
-
-        case _ALGORITHM_PMRES_:
-            S = new PMRES(verbosity, weight, pmreslin, pmreslin_delsol, pmreslin_varres, pmreslin_varresCG,
-                          pmreslin_cgLim, pmreslin_relax2strat, pmreslin_incvarres);
-            break;
-
-        case _ALGORITHM_LINEAR_SU_:
-            S = new LinearSU(verbosity, bmo, cardinality, pb);
-            break;
-
-        case _ALGORITHM_PART_MSU3_:
-            S = new PartMSU3(verbosity, partition_strategy, graph_type, cardinality);
-            break;
-
-        case _ALGORITHM_MSU3_:
-            S = new MSU3(verbosity);
-            break;
-
-        case _ALGORITHM_OLL_:
-            S = new OLL(verbosity, cardinality);
-            break;
-
-        case _ALGORITHM_BEST_:
-            break;
-
-        default:
-            printf("c Error: Invalid MaxSAT algorithm.\n");
-            printf("s UNKNOWN\n");
-            exit(_ERROR_);
-    }
-    signal(SIGXCPU, SIGINT_exit);
-    signal(SIGTERM, SIGINT_exit);
-
-    genEncoding(argc,argv);
-
-    if (maxsat_formula->getProblemType() == _UNWEIGHTED_) {
-        // Unweighted
-        S = new PartMSU3(_VERBOSITY_MINIMAL_, _PART_BINARY_, RES_GRAPH,
-                         cardinality);
-        S->loadFormula(maxsat_formula);
-
-        if (((PartMSU3 *)S)->chooseAlgorithm() == _ALGORITHM_MSU3_) {
-          // FIXME: possible memory leak
-          S = new MSU3(_VERBOSITY_MINIMAL_);
-        }
-
-      } else {
-      S->loadFormula(maxsat_formula);
-        // Weighted
-        S = new OLL(_VERBOSITY_MINIMAL_, cardinality);
-      }
-
-
-
-}
-#endif
-
-#if  MAXSATNID==1
 void tt(int argc, char **argv) {
     BoolOption printmodel("Open-WBO", "print-model", "Print model.\n", true);
-    BoolOption optC1T("Timetabler", "opt-allocation",
-                      "Optimality for Allocation?\n",
-                      false);
-    IntOption optionT("Timetabler", "opt-time",
-                      "0 - For all section and all time\n"
-                              "1 - For all time\n"
-                              "2 - Smart time\n",
-                      2);
+    BoolOption optClean("Timetabler", "clean",
+                      "Smart clean stored data\n",
+                      true);
+    IntOption optionContinue("Timetabler", "continuous",
+                                              "Continous solving mode\n",
+                                              true);
+
 
     IntOption num_tests("Test", "num_tests", "Number of tests\n", 0,
                         IntRange(0, 10000000));
@@ -1359,9 +713,9 @@ void tt(int argc, char **argv) {
 
 
 }
-#endif
 
-#if  MAXSATNID<5
+
+
 void newVar(std::string name,MaxSATFormula*maxsat_formula){
 
 }
@@ -1433,7 +787,6 @@ int getVariableID(std::string varName,MaxSATFormula*maxsat_formula) {
     return id;
 }
 
-#endif
 
 
 Instance readPESPInstance(char* local){
