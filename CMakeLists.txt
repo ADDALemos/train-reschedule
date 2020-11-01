@@ -843,6 +843,6 @@ set(SOURCE_FILES
     LICENSE
     main.cc
     Makefile
-    README.md)
+    README.md Serializable.h problem/disruption.h)
 
 add_executable(train_reschedule ${SOURCE_FILES})

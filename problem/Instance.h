@@ -12,7 +12,8 @@
 #include "Route.h"
 #include "train_run_sections.h"
 
-class Instance {
+
+class Instance{
 public:
     int hash;
     std::string label;
@@ -33,6 +34,18 @@ public:
 
     //solution
     int solution_hash;
+
+    friend ostream &operator<<(ostream &os, const Instance &instance) {
+        /*os << "hash: " << instance.hash << " label: " << instance.label << " maxBandabweichung: "
+           << instance.maxBandabweichung<< " train: " << instance.train << " route: " << instance.route
+           << " resource: " << instance.resource << " sectionMap: " << instance.sectionMap << " pathMap: "
+           << instance.pathMap << " markerRMap: " << instance.markerRMap << " entryMap: " << instance.entryMap
+           << " exitMap: " << instance.exitMap << " markerMap: " << instance.markerMap << " end: " << instance.end
+           << " route_pen: " << instance.route_pen << " results: " << instance.results << " solution_hash: "
+           << instance.solution_hash;*/
+        return os;
+    }
+
 
 
 

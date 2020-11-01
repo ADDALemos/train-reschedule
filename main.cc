@@ -96,7 +96,7 @@
 #include "problem/Route.h"
 #include "problem/route_path.h"
 #include "problem/route_section.h"
-
+#include "problem/disruption.h"
 
 #define VER1_(x) #x
 #define VER_(x) VER1_(x)
@@ -149,9 +149,7 @@ static void SIGINT_exit(int signum) {
 void newVar(std::string,MaxSATFormula*maxsat_formula);
 
 void tt(int argc, char **argv);
-void loandra(int argc, char **argv);
-void LinSBPS(int argc, char **argv);
-void Open_WBO_Inc(int argc, char **argv);
+
 void genEncoding(int argc, char **argv);
 
 
@@ -161,6 +159,8 @@ using namespace rapidjson;
 using namespace std;
   Instance readPESPInstance(char* local);
 
+
+void opt(const string &delimiter);
 
 int main(int argc, char **argv) {
     //    readOutputJSONFile(argv[1]);
@@ -300,10 +300,13 @@ int main(int argc, char **argv) {
 
 
 void genEncoding(int argc, char **argv) {
+    Disruption *d = new Disruption();
+//alpha* Sum(ti-startno_t)*T+B*Sum(r-original)+ gama= 0 delay< delta 20+1.5*delay delay>delta
 
     maxsat_formula = new MaxSATFormula();
     maxsat_formula->setFormat(_FORMAT_PB_);
     instance= readJSONFile(argv[1]);
+    d->blockTrain(instance,0.1);
     //stat(instance,diffV);
     //std::exit(1);
     int secV=0;
@@ -456,12 +459,16 @@ void genEncoding(int argc, char **argv) {
     std::cout<<timeV<<std::endl;
 
 
+    opt(delimiter);
+}
+
+void opt(const string &delimiter) {
     printf("Opt\n");
-    std::map<std::string, double >::iterator itpen = instance.route_pen.begin();;
+    std::map<std::string, double >::iterator  itpen = instance.route_pen.begin();;
     PBObjFunction *of = new PBObjFunction();
     while (itpen != instance.route_pen.end()) {
             //vec<Lit> litpen;
-            std::string rid = itpen->first.substr(0, itpen->first.find(delimiter));
+            string rid = itpen->first.substr(0, itpen->first.find(delimiter));
             std::string section = itpen->first.substr(itpen->first.find(delimiter) + 1, itpen->first.size());
             //litpen.push(mkLit(getVariableID("t^" + rid + "^" + section,maxsat_formula)));
 
@@ -475,7 +482,6 @@ void genEncoding(int argc, char **argv) {
     if(of->_lits.size()!=0)
             maxsat_formula->addObjFunction(of);
 }
-
 
 
 void tt(int argc, char **argv) {
@@ -602,7 +608,7 @@ void tt(int argc, char **argv) {
 
 
     parseOptions(argc, argv, true);
-    option=(int) optionT;
+
 
 
     if ((int) num_tests) {
